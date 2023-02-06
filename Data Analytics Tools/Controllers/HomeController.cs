@@ -40,7 +40,7 @@ namespace Data_Analytics_Tools.Controllers
             
             try
             {
-                await apacheHelper.DownloadApacheFilesFromServer(startDate, endDate);
+                await apacheHelper.DownloadApacheFilesFromServerQuick(startDate, endDate);
             }
             catch(Exception e)
             {

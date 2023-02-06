@@ -31,7 +31,11 @@ namespace Data_Analytics_Tools
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddScoped<IBusinessLogicData, BusinessLogicData>();
-            services.AddSignalR();
+            services.AddSignalR(hubOptions =>
+            {
+                hubOptions.EnableDetailedErrors = true;
+                hubOptions.KeepAliveInterval = TimeSpan.FromMinutes(60);
+            });
             services.AddSingleton<AdminHub>();
         }
 

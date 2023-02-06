@@ -1,17 +1,20 @@
 ﻿
     var connection = new signalR.HubConnectionBuilder().withUrl("/adminHub").build();
+    connection.serverTimeoutInMilliseconds = 18000000;
 
     $(function ()
     {
         connection.start().then(function ()
         {
             console.log("Connecting to adminHub");
+            console.log("server timeout: " + connection.serverTimeoutInMilliseconds);
         }).catch(function (err)
         {
             return console.error(err.toString());
         });
     });
 
+    
     connection.on("ReceivedMessage", function (type, message, status)
     {
         var icon = GetStatusContent(status);
@@ -43,6 +46,12 @@
             $("#ImportsCount").show();
             $("#filesImported").text(message);
         }
+    });
+
+    connection.onclose(() =>
+    {
+        connection = new signalR.HubConnectionBuilder().withUrl("/adminHub").build();
+        connection.serverTimeoutInMilliseconds = 18000000;
     });
 
     function GetStatusContent(status)

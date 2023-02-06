@@ -182,7 +182,7 @@ namespace Data_Analytics_Tools.Helpers
 
         public async Task CreateTablesSchema(bool schemaOnly = false)
         {
-            await sql.CreateDatabase("Q3_2022");
+            await sql.CreateDatabase("Q1_2023");
 
             var schemaDir = "DATA\\Schema.txt";
 
@@ -362,6 +362,44 @@ namespace Data_Analytics_Tools.Helpers
             return false;
         }
 
+        private bool DownloadApacheFileFromServerQuick(string fileUrl,List<string> errorsList)
+        {
+            try
+            {
+                var filename = GetApacheFileName(fileUrl);
+                var destination = $"{apacheLogsDirectory_Downloads}\\QuickJan\\{filename}";
+                webClient.DownloadFile(fileUrl, destination);
+                return true;
+            }
+            catch (Exception e)
+            {
+                errorsList.Add(e.Message);
+            }
+            return false;
+        }
+
+        public async Task DownloadApacheFilesFromServerQuick(DateTime startDate, DateTime endDate)
+        {
+            //await CreateLogFileListForDownload(startDate, endDate);
+
+            string logfileList = apacheLogsDirectory_LogHashes + "log_fileList_for_download.txt";
+            StreamReader file = new StreamReader(logfileList);
+
+            var allApacheLinks = file.ReadToEnd().Split(",");
+            file.Close();
+
+            var errorsList = new List<string>();
+
+            var downlods = 0;
+            foreach (var apacheLink in allApacheLinks)
+            {
+                var downloaded = DownloadApacheFileFromServerQuick(apacheLink, errorsList);
+                if (downloaded)
+                {
+                    downlods++; 
+                }
+            }
+        }
         public async Task DownloadApacheFilesFromServer(DateTime startDate, DateTime endDate)
         {
            // await api.ListAllParquets();
@@ -488,7 +526,7 @@ namespace Data_Analytics_Tools.Helpers
 
             var errorsList = new List<string>();
 
-            var logHashes = await api.ListAllParquets(startDate, endDate);
+            var logHashes = (await api.ListAllParquets(startDate, endDate)).OrderBy(x=>x.StartDate).ToList();
 
             //var test = logHashes.Where(x => x.LogScriptName == "Vodacom_Car1_UMTS_Data").ToList();
 
@@ -499,54 +537,61 @@ namespace Data_Analytics_Tools.Helpers
 
             foreach (var apacheLink in allApacheLinks)
             {
-                var logHash = long.Parse(GetApacheFileLogHash(apacheLink));
-                var apacheLog = logHashes.FirstOrDefault(x => x.LogHash == logHash);
-
-                var apacheFileServer = GetServerFileName(apacheLog, apacheLink);
-                var localApacheFileDir = $"{GetDestinationFolder(apacheLog)}\\{apacheFileServer}";
-                //var apacheFileNameServer = $"{apacheLogsDirectory_Downloads}" + "\\" + apacheFileName;
-
-                var procsdFile = processFiles.FirstOrDefault(x => x.FilePath == localApacheFileDir);
-
-                if (procsdFile != null && procsdFile.ImportComplete)
+                try
                 {
-                    continue;
-                }
+                    var logHash = long.Parse(GetApacheFileLogHash(apacheLink));
+                    var apacheLog = logHashes.FirstOrDefault(x => x.LogHash == logHash);
 
-                var date = apacheLog.StartDate;
+                    var apacheFileServer = GetServerFileName(apacheLog, apacheLink);
+                    var localApacheFileDir = $"{GetDestinationFolder(apacheLog)}\\{apacheFileServer}";
+                    //var apacheFileNameServer = $"{apacheLogsDirectory_Downloads}" + "\\" + apacheFileName;
 
-                if (date.Day != lastDate.Day || date.Month != lastDate.Month || date.Year != lastDate.Year)
-                {
-                    var dateMsg = $"Apache Logs for date : <b>{date.ToString("dd/MM/yyyy")}</b>";
-                    await signalR.SendApacheLogsProcess("date", dateMsg, "started");
-                    lastDate = date;
-                }
+                    var procsdFile = processFiles.FirstOrDefault(x => x.FilePath == localApacheFileDir);
 
-                var message = $"Download:'<b>{apacheLog.LogTag}_{apacheFileServer}</b>'...";
-                
-                await signalR.SendApacheLogsProcess("download", message, "started");
-
-                bool downloaded = DownloadApacheFileFromServer(apacheLog, apacheLink, localApacheFileDir, errorsList);
-
-                if (downloaded)
-                {
-                    downloadsCount++;
-                    await signalR.SendApacheLogsProcess("download", $"'{apacheLog.LogTag}_{apacheFileServer}' downloaded!", "completed");
-                    await signalR.SendApacheLogsProcess("downloadsCount", $"{downloadsCount}", "completed");
-
-                    message = $"Import:'<b>{apacheLog.LogTag}_{apacheFileServer}</b>' to MySQL Db = <b>Q3_2022</b>...";
-                    
-                    await signalR.SendApacheLogsProcess("import",message, "started");
-
-                    int rows = await ImportApacheFileToMySQL(localApacheFileDir, errorsList);
-
-                    if (rows > 0)
+                    if (procsdFile != null && procsdFile.ImportComplete)
                     {
-                        importedFilesCount++;
-                        await signalR.SendApacheLogsProcess("import", $"'{apacheLog.LogTag}_{apacheFileServer}' imported", "completed");
-                        await signalR.SendApacheLogsProcess("importsCount", $"{importedFilesCount}", "completed");
+                        continue;
                     }
-                    
+
+                    var date = apacheLog.StartDate;
+
+                    if (date.Day != lastDate.Day || date.Month != lastDate.Month || date.Year != lastDate.Year)
+                    {
+                        var dateMsg = $"Apache Logs for date : <b>{date.ToString("dd/MM/yyyy")}</b>";
+                        await signalR.SendApacheLogsProcess("date", dateMsg, "started");
+                        lastDate = date;
+                    }
+
+                    var message = $"Download:'<b>{apacheLog.LogTag}_{apacheFileServer}</b>'...";
+
+                    await signalR.SendApacheLogsProcess("download", message, "started");
+
+                    bool downloaded = DownloadApacheFileFromServer(apacheLog, apacheLink, localApacheFileDir, errorsList);
+
+                    if (downloaded)
+                    {
+                        downloadsCount++;
+                        await signalR.SendApacheLogsProcess("download", $"'{apacheLog.LogTag}_{apacheFileServer}' downloaded!", "completed");
+                        await signalR.SendApacheLogsProcess("downloadsCount", $"{downloadsCount}", "completed");
+
+                        message = $"Import:'<b>{apacheLog.LogTag}_{apacheFileServer}</b>' to MySQL Db = <b>Q3_2022</b>...";
+
+                        await signalR.SendApacheLogsProcess("import", message, "started");
+
+                        int rows = await ImportApacheFileToMySQL(localApacheFileDir, errorsList);
+
+                        if (rows > 0)
+                        {
+                            importedFilesCount++;
+                            await signalR.SendApacheLogsProcess("import", $"'{apacheLog.LogTag}_{apacheFileServer}' imported", "completed");
+                            await signalR.SendApacheLogsProcess("importsCount", $"{importedFilesCount}", "completed");
+                        }
+
+                    }
+                }
+                catch (Exception e)
+                {
+                    errorsList.Add(e.Message);
                 }
             }
         }

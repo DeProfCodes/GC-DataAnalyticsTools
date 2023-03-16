@@ -85,6 +85,10 @@ namespace Data_Analytics_Tools.Helpers
                     if (row < schema.Count - 1)
                         insert.Append(",");
                 }
+
+                if (tableName == "logs")
+                    insert.Append(",'Q3_2022'");
+
                 insert.Append(");");
                 query.Append(insert);
                 //log_hash = GetValue(columns, 0, r);

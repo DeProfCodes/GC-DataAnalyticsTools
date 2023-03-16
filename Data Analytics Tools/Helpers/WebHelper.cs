@@ -14,7 +14,8 @@ namespace Data_Analytics_Tools.Helpers
     public class WebHelper
     {
         private HttpClient client;
-        private string api_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZV9zaGEiOiIwY2E1MGY3ZTZjZDIyNzc4NDg2YWZlZGI4Njg4ZTE0NmFlMTM2MjkwIn0.wV-rosnwbsFZUTomNnypVr1PN4gqwDpraIY54kIbF7w";
+        private string api_token_telkom = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZV9zaGEiOiIwY2E1MGY3ZTZjZDIyNzc4NDg2YWZlZGI4Njg4ZTE0NmFlMTM2MjkwIn0.wV-rosnwbsFZUTomNnypVr1PN4gqwDpraIY54kIbF7w";
+        private string api_token_vodacom = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZV9zaGEiOiIyNWE4NzI2Y2YwNWY5YTk5MDQ3YTIzZjAzYmQ3MGNhMDliNjQ4MmFkIn0.rRCTfNJfKReCZdR0mrwFyOK6KqdK2DEx23XWN6konMY";
         private string requestUrl = "https://gnu0.azenqos.com/uapi";
 
 
@@ -39,7 +40,7 @@ namespace Data_Analytics_Tools.Helpers
                 {
                     Method = HttpMethod.Post,
                     RequestUri = new Uri($"{requestUrl}/{apiCallEndPoint}"),
-                    Headers = { { "Authorization", $"Bearer {api_token}" } },
+                    Headers = { { "Authorization", $"Bearer {api_token_telkom}" } },
                     Content = new StringContent(content, Encoding.UTF8, "application/json"),
                 };
             }

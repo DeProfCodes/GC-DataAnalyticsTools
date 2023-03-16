@@ -27,6 +27,8 @@ namespace Data_Analytics_Tools.Helpers
         private string apacheLogsDirectory_LogHashes;
         private string apacheLogsDirectory_Downloads;
 
+        private string databaseName = "";
+
         public ApacheLogFilesHelper(IBusinessLogicData dataIO, AdminHub signalR)
         {
             api = new WebHelper();
@@ -40,6 +42,9 @@ namespace Data_Analytics_Tools.Helpers
             schemas = new Dictionary<string, List<Dictionary<string, string>>>();
 
             SetApacheLogsDirectory(@"F:\Proficient\DATA\Apache Log Files");
+            //SetApacheLogsDirectory(@"F:\Proficient\DATA\Apache Log Files (VDC_DT)");
+            databaseName = "Q1_2023";
+            //databaseName = "Q1_2023_VDC_DT_TEST";
         }
 
         #region Tables Schema
@@ -110,7 +115,7 @@ namespace Data_Analytics_Tools.Helpers
                     currTableSchema.Add(dict);
                 }
 
-                queryBuilder += line + "\n";
+                
                 query += line + "\n";
 
                 if (line == null || line.Contains("CREATE"))
@@ -150,6 +155,10 @@ namespace Data_Analytics_Tools.Helpers
                     }
                     queryBuilder = "";
                 }
+                else 
+                {
+                    queryBuilder += line + "\n";
+                }
 
                 if (line.ToLower().Contains("insert"))
                 {
@@ -182,7 +191,7 @@ namespace Data_Analytics_Tools.Helpers
 
         public async Task CreateTablesSchema(bool schemaOnly = false)
         {
-            await sql.CreateDatabase("Q1_2023");
+            await sql.CreateDatabase(databaseName);
 
             var schemaDir = "DATA\\Schema.txt";
 
@@ -196,8 +205,8 @@ namespace Data_Analytics_Tools.Helpers
 
                 if (!schemaOnly)
                 {
-                    //await sql.RunBulkQueries(createTablesQueries);
-                    await sql.RunQuery(createTables);
+                    await sql.RunBulkQueries(createTablesQueries);
+                    //await sql.RunQuery(createTables);
                 }
             }
             catch (Exception e)
@@ -574,7 +583,7 @@ namespace Data_Analytics_Tools.Helpers
                         await signalR.SendApacheLogsProcess("download", $"'{apacheLog.LogTag}_{apacheFileServer}' downloaded!", "completed");
                         await signalR.SendApacheLogsProcess("downloadsCount", $"{downloadsCount}", "completed");
 
-                        message = $"Import:'<b>{apacheLog.LogTag}_{apacheFileServer}</b>' to MySQL Db = <b>Q3_2022</b>...";
+                        message = $"Import:'<b>{apacheLog.LogTag}_{apacheFileServer}</b>' to MySQL Db = <b>{databaseName}</b>...";
 
                         await signalR.SendApacheLogsProcess("import", message, "started");
 

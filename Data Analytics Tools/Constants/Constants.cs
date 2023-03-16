@@ -8,7 +8,7 @@ namespace Data_Analytics_Tools.Constants
         {
             List<string> tables = new List<string>()
             {
-                "location","lte_l1_dl_tp", "lte_handover_stats", "lte_l1_ul_tp", "lte_pdsch_meas", "lte_sib3_info", "gmm_state", "wcdma_bler", 
+                "location","lte_l1_dl_tp", "lte_handover_stats", "lte_l1_ul_tp", "lte_pdsch_meas", "lte_sib3_info", "gmm_state", "wcdma_bler",
                 "wcdma_pilot_pollution", "reg_state", "lte_rlc_ul_stats", "events", "vocoder_info", "gsm_server_bcch_rxlev", "log_info", "nb1_ded_info_nas",
                 "wcdma_hsdpa_cqi", "wcdma_rx_power", "lte_pucch_tx_info", "wifi_scanned", "lte_emm_state", "gsm_serv_cell_info",
                 "wcdma_bearers", "wcdma_to_gsm_ho_dur", "android_info_1sec", "data_wcdma_rlc_stats", "wcdma_hsupa_stats",
@@ -36,9 +36,31 @@ namespace Data_Analytics_Tools.Constants
                 "data_hsdpa_thoughput","data_hsupa_total_e_dpdch_throughput","gsm_rxlev_sub_dbm", "gsm_rxqual_sub", "gsm_arfcn_bcch",
                 "polqa_mos_1", "data_trafficstat_dl_mbps", "data_trafficstat_ul_mbps", "Cm_info_Table", "Voice_Sessions_Table", "Mos_Table",
                 "Codec_1", "Codec_Table", "Codec_Table_1","Events_info","Mos_Table_1","Voice_Sessions_Table_1","Cm_info_Table_1",
-                "Cm_info_Table_2","Long_Call_Table", "CM_Data_Table","CM_Data_Table_1","Codec_3","Telkom_Codec","Codec_Mos","RAT_Table"
+                "Cm_info_Table_2","Long_Call_Table", "CM_Data_Table","CM_Data_Table_1","Codec_3","Telkom_Codec","Codec_Mos","RAT_Table",
+                "pp_statement_sum_browse", "pp_statement_sum_ftp_download","pp_statement_sum_ftp_upload","pp_statement_sum_ping",
+                "pp_statement_sum_lte_pdsch_stream0_modulation_changes","pp_wcdma_ho", "ftpdl", "data_egprs_stats"
             };
             return tables;
         }
+
+        public static List<string> GetApacheKnownTables2()
+        {
+            var tables = new List<string>()
+            {
+                "pp_statement_sum_browse", "pp_statement_sum_ftp_download","pp_statement_sum_ftp_upload","pp_statement_sum_ping",
+                "pp_statement_sum_lte_pdsch_stream0_modulation_changes","pp_wcdma_ho", "ftpdl", "data_egprs_stats"
+            };
+            return tables;
+        }
+
+        public static List<string> GetApacheKnownTables20()
+        {
+            var tables = new List<string>()
+            {
+                "pp_statement_sum_ftp_download","pp_statement_sum_ftp_upload"
+            };
+            return tables;
+        }
+
     }
 }
